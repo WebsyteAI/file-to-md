@@ -1,9 +1,12 @@
 {
   "name": "file-to-md",
-  "main": "src/index.tsx",
   "compatibility_date": "2025-03-07",
   "compatibility_flags": ["nodejs_compat"],
+  "main": "src/index.tsx",
   "observability": {
     "enabled": true
+  },
+  "ai": {
+    "binding": "AI"
   }
 }
