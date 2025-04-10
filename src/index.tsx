@@ -1,10 +1,27 @@
+/** @jsx h */
 import { Hono } from 'hono';
-import { serveStatic } from 'hono/serve-static';
+import { jsx, serveStatic } from 'hono/jsx';
+import MarkdownResults from './components/MarkdownResults';
+import FAQs from './components/FAQs';
+import AdSense from './components/AdSense';
 
 const app = new Hono();
 
-// Serve static files (e.g., the frontend)
-app.use('/static/*', serveStatic({ root: './public' }));
+// Home route
+app.get('/', (c) => {
+  return jsx(
+    <html>
+      <head>
+        <title>Markdown Conversion Service</title>
+      </head>
+      <body>
+        <h1>Welcome to the Markdown Conversion Service</h1>
+        <FAQs />
+        <AdSense />
+      </body>
+    </html>
+  );
+});
 
 // Test endpoint
 app.get('/test', (c) => {
