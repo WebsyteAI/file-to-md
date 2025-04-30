@@ -10,9 +10,11 @@ export const apiConvertHandler = async (c: Context) => {
     const formData = await c.req.parseBody();
     const files: Array<{ name: string; blob: Blob }> = [];
     for (const value of Object.values(formData)) {
-      // If value is a File/Blob (has arrayBuffer), use as is
+      // If value is a File/Blob (has arrayBuffer), use as is but always create a new Blob
       if (value && typeof value.arrayBuffer === 'function') {
-        files.push({ name: value.name, blob: value });
+        const arrayBuffer = await value.arrayBuffer();
+        const blob = new Blob([arrayBuffer], { type: value.type || 'application/octet-stream' });
+        files.push({ name: value.name, blob });
       }
       // If value is a JSON string, try to parse and convert base64/data URL to Blob
       else if (typeof value === 'string') {
