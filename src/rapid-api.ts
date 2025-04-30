@@ -17,6 +17,11 @@ export interface Env {
 
 const app = new Hono<{ Bindings: Env }>();
 
+// Health check endpoint
+app.get('/api/health', (c) => {
+  return c.json({ status: 'ok', timestamp: Date.now() });
+});
+
 // POST /api/convert
 // Accepts multipart/form-data with a file, returns JSON with markdown results
 app.post('/api/convert', async (c) => {

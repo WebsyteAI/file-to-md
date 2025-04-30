@@ -6,6 +6,22 @@ info:
 servers:
   - url: https://file-to-md-pv.websyte.ai
 paths:
+  /api/health:
+    get:
+      summary: Health check
+      description: Returns status and timestamp to verify the API is running.
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  timestamp:
+                    type: integer
   /api/convert:
     post:
       summary: Convert uploaded file(s) to Markdown
