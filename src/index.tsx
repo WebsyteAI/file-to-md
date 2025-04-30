@@ -57,12 +57,21 @@ app.post('/api/convert', async (c) => {
   try {
     const formData = await c.req.parseBody();
     const files: Array<{ name: string; blob: Blob }> = [];
-    for (const value of Object.values(formData)) {
-      if (value instanceof File) {
+    for (const [key, value] of Object.entries(formData)) {
+      // Accept any file-like object (from node-fetch/form-data or browser)
+      if (
+        value &&
+        typeof value === 'object' &&
+        'type' in value &&
+        typeof value.type === 'string' &&
+        'arrayBuffer' in value &&
+        typeof value.arrayBuffer === 'function'
+      ) {
         if (!SUPPORTED_MIME_TYPES.includes(value.type)) {
           return c.json({ error: `Unsupported file type: ${value.type}` }, 400);
         }
-        files.push({ name: value.name, blob: value });
+        // Use the field name as the file name if value.name is missing
+        files.push({ name: value.name || key, blob: value });
       }
     }
     if (files.length === 0) {
@@ -174,11 +183,18 @@ app.post('/convert', async (c) => {
     const files: Array<{ name: string; blob: Blob }> = [];
 
     for (const [key, value] of Object.entries(formData)) {
-      if (value instanceof File) {
+      if (
+        value &&
+        typeof value === 'object' &&
+        'type' in value &&
+        typeof value.type === 'string' &&
+        'arrayBuffer' in value &&
+        typeof value.arrayBuffer === 'function'
+      ) {
         if (!SUPPORTED_MIME_TYPES.includes(value.type)) {
           return c.text(`Unsupported file type: ${value.type}`, 400);
         }
-        files.push({ name: value.name, blob: value });
+        files.push({ name: value.name || key, blob: value });
       }
     }
 
