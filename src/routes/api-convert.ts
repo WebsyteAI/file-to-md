@@ -18,6 +18,7 @@ export const apiConvertHandler = async (c: Context) => {
     const results = await c.env.AI.toMarkdown(files);
     return c.json({ results });
   } catch (error) {
+    console.error('Error in /api/convert:', error);
     return c.json({ error: 'Internal Server Error' }, 500);
   }
 };
