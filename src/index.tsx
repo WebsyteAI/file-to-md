@@ -42,6 +42,39 @@ app.get('/test', (c) => {
   return c.json({ message: 'Test endpoint is working!' });
 });
 
+// Health check endpoint for API monitoring
+app.get('/api/health', (c) => {
+  return c.json({ status: 'ok', timestamp: Date.now() });
+});
+
+// RapidAPI endpoint: POST /api/convert
+app.post('/api/convert', async (c) => {
+  const contentType = c.req.header('Content-Type') || '';
+  if (!contentType.includes('multipart/form-data')) {
+    return c.json({ error: 'Content-Type must be multipart/form-data' }, 400);
+  }
+
+  try {
+    const formData = await c.req.parseBody();
+    const files: Array<{ name: string; blob: Blob }> = [];
+    for (const value of Object.values(formData)) {
+      if (value instanceof File) {
+        if (!SUPPORTED_MIME_TYPES.includes(value.type)) {
+          return c.json({ error: `Unsupported file type: ${value.type}` }, 400);
+        }
+        files.push({ name: value.name, blob: value });
+      }
+    }
+    if (files.length === 0) {
+      return c.json({ error: 'No files uploaded' }, 400);
+    }
+    const results = await c.env.AI.toMarkdown(files);
+    return c.json({ results });
+  } catch (error) {
+    return c.json({ error: 'Internal Server Error' }, 500);
+  }
+});
+
 // Home page with file upload form
 app.get('/', (c) => {
   return c.html(
@@ -128,7 +161,7 @@ app.get('/', (c) => {
   );
 });
 
-// Endpoint to handle file uploads and convert to Markdown
+// Endpoint to handle file uploads and convert to Markdown (UI form)
 app.post('/convert', async (c) => {
   const contentType = c.req.header('Content-Type') || '';
   if (!contentType.includes('multipart/form-data')) {
