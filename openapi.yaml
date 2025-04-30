@@ -1,0 +1,62 @@
+openapi: 3.0.3
+info:
+  title: File-to-Markdown Conversion API
+  description: API for converting uploaded files to Markdown using Workers AI. Supports PDF, images, HTML, XML, Office, CSV, and more.
+  version: 1.0.0
+servers:
+  - url: https://file-to-md-pv.websyte.ai
+paths:
+  /api/convert:
+    post:
+      summary: Convert uploaded file(s) to Markdown
+      description: Accepts multipart/form-data with one or more files. Returns Markdown conversion results for each file.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: File to convert (PDF, image, HTML, XML, Office, CSV, etc.)
+      responses:
+        '200':
+          description: Conversion successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        mimeType:
+                          type: string
+                        tokens:
+                          type: integer
+                        data:
+                          type: string
+        '400':
+          description: Bad request (missing file or wrong content type)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
