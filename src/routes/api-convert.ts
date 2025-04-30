@@ -10,7 +10,30 @@ export const apiConvertHandler = async (c: Context) => {
     const formData = await c.req.parseBody();
     const files: Array<{ name: string; blob: Blob }> = [];
     for (const value of Object.values(formData)) {
-      files.push({ name: value.name, blob: value });
+      // If value is a File/Blob (has arrayBuffer), use as is
+      if (value && typeof value.arrayBuffer === 'function') {
+        files.push({ name: value.name, blob: value });
+      }
+      // If value is a JSON string, try to parse and convert base64/data URL to Blob
+      else if (typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value);
+          if (parsed && typeof parsed.data === 'string' && typeof parsed.value === 'string') {
+            let mimeType = 'application/octet-stream';
+            let base64 = parsed.data;
+            const match = parsed.data.match(/^data:(.*?);base64,(.*)$/);
+            if (match) {
+              mimeType = match[1];
+              base64 = match[2];
+            }
+            const binary = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+            const blob = new Blob([binary], { type: mimeType });
+            files.push({ name: parsed.value, blob });
+          }
+        } catch (e) {
+          // Not a JSON string, skip
+        }
+      }
     }
     if (files.length === 0) {
       return c.json({ error: 'No files uploaded' }, 400);
